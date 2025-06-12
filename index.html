@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR 색상 발광 앱</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            transition: background-color 0.5s ease;
+        }
+        #reader {
+            width: 80%;
+            max-width: 500px;
+            margin-top: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #button-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .action-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        #celebrate-button {
+            background-color: #FFD700; /* Yellow */
+            color: #333;
+        }
+        #attack-button {
+            background-color: #DC143C; /* Red */
+        }
+        #status-message {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #555;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="reader"></div>
+    <div id="status-message">QR 코드를 스캔하세요.</div>
+    <div id="button-container">
+        <button id="celebrate-button" class="action-button">축하</button>
+        <button id="attack-button" class="action-button">공격</button>
+    </div>
+
+    <script>
+        const html5QrCode = new Html5Qrcode("reader");
+        const statusMessage = document.getElementById("status-message");
+        const body = document.body;
+
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            // QR 코드 스캔 성공 시 화면 전체를 밝게 발광
+            body.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 80%)`; // 무작위 밝은 색상
+            statusMessage.textContent = `QR 코드 스캔 성공! 내용: ${decodedText.substring(0, 30)}...`;
+            console.log(`QR Code scanned: ${decodedText}`);
+        };
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        // 카메라 시작
+        html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback, (errorMessage) => {
+            // 스캔 에러는 사용자에게 보여주지 않음 (너무 자주 발생할 수 있음)
+            // console.warn(`QR Code Scan Error: ${errorMessage}`);
+            statusMessage.textContent = "카메라를 찾거나 QR 코드를 스캔하는 중 오류가 발생했습니다.";
+        }).catch((err) => {
+            statusMessage.textContent = "카메라 접근 권한을 허용해주세요.";
+            console.error("Camera access failed:", err);
+        });
+
+        // 축하 버튼 클릭 이벤트
+        document.getElementById('celebrate-button').addEventListener('click', () => {
+            body.style.backgroundColor = 'linear-gradient(to right, #FFFF00, #0000FF)'; /* Yellow and Blue */
+            body.style.backgroundImage = 'linear-gradient(to right, #FFFF00, #0000FF)';
+            statusMessage.textContent = "축하합니다! ✨";
+        });
+
+        // 공격 버튼 클릭 이벤트
+        document.getElementById('attack-button').addEventListener('click', () => {
+            body.style.backgroundColor = 'linear-gradient(to right, #FFFF00, #FF0000)'; /* Yellow and Red */
+            body.style.backgroundImage = 'linear-gradient(to right, #FFFF00, #FF0000)';
+            statusMessage.textContent = "공격! 💥";
+        });
+
+        // 초기 상태로 되돌리는 기능 (선택 사항)
+        body.addEventListener('click', (event) => {
+            if (!event.target.closest('.action-button')) {
+                // 버튼이 아닌 곳을 클릭하면 배경색을 초기화 (QR 스캐너 색상으로)
+                // body.style.backgroundColor = '#f0f0f0';
+                // statusMessage.textContent = "QR 코드를 스캔하세요.";
+            }
+        });
+    </script>
+</body>
+</html>
